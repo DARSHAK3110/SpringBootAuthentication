@@ -1,11 +1,11 @@
 package com.training.authentication.controller;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,95 +15,54 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.training.authentication.entity.User;
+import com.training.authentication.dto.request.UserRequestDto;
+import com.training.authentication.dto.response.UserResponseDto;
+import com.training.authentication.response.CustomBaseResponse;
 import com.training.authentication.service.UserService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 
 @RestController
+@PropertySource("classpath:message.properties")
 @RequestMapping("/api/v1/users")
 public class UserController {
 
 	@Autowired
+	private Environment env;
+	
+	@Autowired
 	private UserService userSerivceImpl;
 	Logger log = Logger.getLogger(UserController.class.getName());
 
-	@GetMapping("")
-	public ResponseEntity<List<User>> getAllUsers() {
-		log.info("findAllUsers");
-		List<User> users = this.userSerivceImpl.getAllUsers();
-		if (users.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-		}
+	@GetMapping
+	public ResponseEntity<List<UserResponseDto>> getAllUsers() {
+		List<UserResponseDto> users = this.userSerivceImpl.getAllUsers();
 		return ResponseEntity.of(Optional.of(users));
 	}
 
-	
 	@GetMapping("/{userId}")
-	public ResponseEntity<User> getUser(@PathVariable("userId") Long userId) {
-		log.info("getUser");
-		try {
-			User user = this.userSerivceImpl.getUser(userId);
-			return ResponseEntity.of(Optional.of(user));				
-		}
-		catch (NoSuchElementException e) {
-			// TODO: handle exception
-			log.severe(e.getMessage());
-			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-			
-		}
-		
+	public ResponseEntity<UserResponseDto> getUser(@PathVariable("userId") @Min(1) Long userId) {
+		UserResponseDto user = this.userSerivceImpl.getUser(userId);
+		return ResponseEntity.of(Optional.of(user));
 	}
-	
-	@PostMapping("")
-	public ResponseEntity<String> saveUser(@RequestBody User user){
-		try{
-			String result = this.userSerivceImpl.saveUser(user);
-			return ResponseEntity.of(Optional.of(result));
+
+	@PostMapping
+	public ResponseEntity<CustomBaseResponse> saveUser(@Valid @RequestBody UserRequestDto user) {
+		this.userSerivceImpl.saveUser(user);
+		return ResponseEntity.ok(new CustomBaseResponse(env.getRequiredProperty("operation.success")));
 	}
-	catch (Exception e) {
-		// TODO: handle exception
-		log.severe(e.getMessage());
-		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-	}
-	}
+
 	@DeleteMapping("/{userId}")
-	public ResponseEntity<String> deleteUser(@PathVariable("userId") Long userId) {
-		log.info("deleteUser");
-		try {
-			 String deleteUser = this.userSerivceImpl.deleteUser(userId);
-			return ResponseEntity.of(Optional.of(deleteUser));				
-		}
-		catch (NoSuchElementException e) {
-			// TODO: handle exception
-			log.severe(e.getMessage());
-			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();	
-		}
-		catch (Exception e) {
-			// TODO: handle exception
-			log.severe(e.getMessage());
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-		}
+	public ResponseEntity<CustomBaseResponse> deleteUser(@PathVariable("userId") @Min(1) Long userId) {
+		this.userSerivceImpl.deleteUser(userId);
+		return ResponseEntity.ok(new CustomBaseResponse(env.getRequiredProperty("operation.success")));
 	}
-	
-	
+
 	@PutMapping("/{userId}")
-	public ResponseEntity<String> updateUser(@RequestBody User user,@PathVariable("userId") Long userId) {
-		log.info("updateUser");
-		try {
-			String updatedUser = this.userSerivceImpl.updateUser(userId,user);
-			return ResponseEntity.of(Optional.of(updatedUser));				
-		}
-		catch (NoSuchElementException e) {
-			// TODO: handle exception
-			log.severe(e.getMessage());
-			return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-		}
-		catch (Exception e) {
-			// TODO: handle exception
-			log.severe(e.getMessage());
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-		}
-		
+	public ResponseEntity<CustomBaseResponse> updateUser(@Valid @RequestBody UserRequestDto user,
+			@PathVariable("userId") @Min(1) Long userId) {
+		this.userSerivceImpl.updateUser(userId, user);
+		return ResponseEntity.ok(new CustomBaseResponse(env.getRequiredProperty("operation.success")));
 	}
 	
 }
-
