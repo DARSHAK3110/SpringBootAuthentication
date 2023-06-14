@@ -1,8 +1,8 @@
-package com.training.authentication.response;
+package com.training.authentication.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class ValidationExceptionResponse extends ExceptionResponse {
+public class ValidationExceptionResponseDto extends ExceptionResponseDto {
 
 	private String fieldName;
 

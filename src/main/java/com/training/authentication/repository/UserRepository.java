@@ -16,6 +16,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	void deleteUser(Long userId);
 
 	List<User> findAllByDeletedAtIsNull();
-
+	Optional<User> findByPhoneNumberAndDeletedAtIsNull(Long phoneNumber);
 	Optional<User> findByUserIdAndDeletedAtIsNull(Long userId);
 }

@@ -1,8 +1,8 @@
-package com.training.authentication.response;
+package com.training.authentication.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class ExceptionResponse extends CustomBaseResponse{
+public class ExceptionResponseDto extends CustomBaseResponseDto{
 
 	private Boolean isError = true;
 	@JsonIgnore
@@ -29,28 +29,28 @@ public class ExceptionResponse extends CustomBaseResponse{
 	public void setException(Exception exception) {
 		this.exception = exception;
 	}
-	public ExceptionResponse(String message, Boolean isError, Exception exception) {
+	public ExceptionResponseDto(String message, Boolean isError, Exception exception) {
 		super();
 		this.message = message;
 		this.isError = isError;
 		this.exception = exception;
 	}
-	public ExceptionResponse(String message, Boolean isError) {
+	public ExceptionResponseDto(String message, Boolean isError) {
 		super();
 		this.message = message;
 		this.isError = isError;
 	}
-	public ExceptionResponse(String message, Exception exception) {
+	public ExceptionResponseDto(String message, Exception exception) {
 		super();
 		this.message = message;
 		this.exception = exception;
 	}
 	
-	public ExceptionResponse(String message) {
+	public ExceptionResponseDto(String message) {
 		super();
 		this.message = message;
 	}
-	public ExceptionResponse() {
+	public ExceptionResponseDto() {
 		super();
 	}
 	

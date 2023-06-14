@@ -14,8 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
-
-import com.training.authentication.response.ValidationExceptionResponse;
+import com.training.authentication.dto.response.ValidationExceptionResponseDto;
 
 @ControllerAdvice
 @PropertySource("classpath:message.properties")
@@ -28,12 +27,12 @@ public class ValidatorHandler extends ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(
 			MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
-		List<ValidationExceptionResponse> valid = new ArrayList<>();
+		List<ValidationExceptionResponseDto> valid = new ArrayList<>();
 		ex.getBindingResult().getAllErrors().forEach(error -> {
 
 			String field = ((FieldError) error).getField();
 			String message = error.getDefaultMessage();
-			ValidationExceptionResponse res = new ValidationExceptionResponse();
+			ValidationExceptionResponseDto res = new ValidationExceptionResponseDto();
 			res.setException(ex);
 			res.setFieldName(field);
 			res.setMessage(env.getProperty(message));
