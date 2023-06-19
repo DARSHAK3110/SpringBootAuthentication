@@ -10,8 +10,11 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import com.training.authentication.entity.enums.Roles;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -28,9 +31,10 @@ public class ApplicationSecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
 		security.csrf(csrf -> csrf.disable())
+		.cors(cors-> cors.configurationSource(corsConfigurationSource()))
 				.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
 						.requestMatchers(HttpMethod.POST, "/api/v1/users/**").permitAll())
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/users/**").hasRole("ADMIN"))
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/users/**").hasRole(Roles.ADMIN.name()))
 				.sessionManagement(
 						sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationProvider(authenticationProvider)
@@ -38,6 +42,20 @@ public class ApplicationSecurityConfig {
 				.exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPoint));
 
 		return security.build();
+	}
+
+	@Bean
+	public CorsConfigurationSource corsConfigurationSource() {
+		 CorsConfiguration configuration = new CorsConfiguration();
+	        configuration.setAllowedOriginPatterns(java.util.Arrays.asList("*"));
+	        configuration.setAllowedMethods(java.util.Arrays.asList("*"));
+	        configuration.setAllowCredentials(true);
+	        configuration.addAllowedOrigin("http://localhost:4200");
+	        configuration.addAllowedHeader("*");
+	        configuration.addAllowedMethod("*");
+	        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+	        source.registerCorsConfiguration("/**", configuration);
+	        return source;
 	}
 
 

@@ -8,6 +8,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin("http://localhost:4200")
 @PropertySource("classpath:message.properties")
 @RequestMapping("/api/v1/users")
 public class UserController {
@@ -81,7 +83,7 @@ public class UserController {
 	
 	@PostMapping("/login") //get refresh token
 	public ResponseEntity<TokenResponseDto> loginUser(@Valid @RequestBody UserLoginRequestDto user) {
-
+		System.out.println(user);
 		authenticationManager
 				.authenticate(new UsernamePasswordAuthenticationToken(user.getPhoneNumber(), user.getPassword()));
 		String userRes = this.userSerivceImpl.generateToken(user.getPhoneNumber());

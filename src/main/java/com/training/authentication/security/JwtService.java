@@ -1,25 +1,18 @@
 package com.training.authentication.security;
 
-import java.util.Collection;
-import java.util.Collections;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-
-import org.springframework.aop.ThrowsAdvice;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
 import com.training.authentication.entity.Log;
 import com.training.authentication.entity.User;
 import com.training.authentication.repository.LogRepository;
 import com.training.authentication.repository.UserRepository;
-
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;

@@ -1,6 +1,5 @@
 package com.training.authentication.exception;
 
-
 import java.io.IOException;
 import java.io.OutputStream;
 import org.springframework.http.MediaType;
@@ -16,16 +15,15 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component("customAuthenticationEntryPoint")
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-   
 	@Override
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException authException) throws IOException, ServletException {
-		  ExceptionResponseDto re = new ExceptionResponseDto("Your token is invalid or token is expired");
-	        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-	        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-	        OutputStream responseStream = response.getOutputStream();
-	        ObjectMapper mapper = new ObjectMapper();
-	        mapper.writeValue(responseStream, re);
-	        responseStream.flush();
+		ExceptionResponseDto re = new ExceptionResponseDto("Your credentials is invalid!!!");
+		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+		OutputStream responseStream = response.getOutputStream();
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.writeValue(responseStream, re);
+		responseStream.flush();
 	}
 }

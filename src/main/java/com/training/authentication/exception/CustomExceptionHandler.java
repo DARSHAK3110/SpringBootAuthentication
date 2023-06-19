@@ -22,7 +22,7 @@ public class CustomExceptionHandler {
 	
 	@ExceptionHandler({NullPointerException.class,NoSuchElementException.class})
 	public final ResponseEntity<ExceptionResponseDto> noSuchElementExceptionHandler(Exception e) {
-		
+		e.printStackTrace();
 		ExceptionResponseDto res = new ExceptionResponseDto("Data not found!!",e);
 		return new ResponseEntity<>(res,HttpStatus.NOT_FOUND);
 	}
