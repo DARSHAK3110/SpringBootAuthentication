@@ -26,6 +26,11 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-jpamodelgen-jakarta</artifactId>
+			<version>5.6.12.Final</version>
+		</dependency>
+		<dependency>
 			<groupId>org.liquibase</groupId>
 			<artifactId>liquibase-core</artifactId>
 		</dependency>
@@ -107,6 +112,13 @@
 				<configuration>
 					<propertyFile>src/main/resources/application.properties</propertyFile>
 					<propertyFileWillOverride>true</propertyFileWillOverride>
+					   <annotationProcessorPaths>
+                    <path>
+                        <groupId>org.hibernate</groupId>
+                        <artifactId>hibernate-jpamodelgen-jakrta</artifactId>
+                        <version>5.6.12.Final</version>
+                    </path>
+                </annotationProcessorPaths>
 				</configuration>
 			</plugin>
 		</plugins>

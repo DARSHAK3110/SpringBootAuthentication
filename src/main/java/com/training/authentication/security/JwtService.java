@@ -55,7 +55,7 @@ public class JwtService {
 		logRepository.save(log);
 		return Jwts.builder().setClaims(claims).setSubject(customUserDetails.getUsername())
 				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
+				.setExpiration(new Date(System.currentTimeMillis() +   10*60 * 1000))
 				.signWith(Keys.hmacShaKeyFor(getKeys()), SignatureAlgorithm.HS256).compact();
 	}
 

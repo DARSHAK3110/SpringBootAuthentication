@@ -30,11 +30,10 @@ public class JwtAuthValidation extends OncePerRequestFilter {
 		final String authHeader = request.getHeader("Authorization");
 		final String jwt;
 		if(authHeader == null || !authHeader.startsWith("Bearer ")) {
-			filterChain.doFilter(request, response);
+			filterChain.doFilter(request, response);	
 			return;
 		}	
 		jwt = Strings.replace(authHeader, "Bearer ", "");
-
 		username = jwtService.extractUsername(jwt);
 		if(username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 			UserDetails userDetails = this.userDetailService.loadUserByUsername(username);

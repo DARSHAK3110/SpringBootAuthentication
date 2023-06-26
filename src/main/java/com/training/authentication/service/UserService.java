@@ -2,35 +2,48 @@ package com.training.authentication.service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
+import java.util.UUID;
 import org.apache.commons.collections4.map.HashedMap;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.training.authentication.dto.request.UserRequestDto;
 import com.training.authentication.dto.response.ClaimsResponseDto;
+import com.training.authentication.dto.response.TokenResponseDto;
 import com.training.authentication.dto.response.UserResponseDto;
+import com.training.authentication.entity.RefreshToken;
 import com.training.authentication.entity.User;
 import com.training.authentication.entity.enums.Roles;
+import com.training.authentication.repository.RefreshTokenRepository;
 import com.training.authentication.repository.UserRepository;
+import com.training.authentication.repository.UserSpecifications;
 import com.training.authentication.security.CustomUserDetail;
 import com.training.authentication.security.JwtService;
 import io.jsonwebtoken.Claims;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
-	
+	private final RefreshTokenRepository refreshTokenRepository;
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
-	public List<UserResponseDto> getAllUsers() {
-		List<User> findAll = this.userRepository.findAllByDeletedAtIsNull();
+	 
+	public Map<String, Object > getAllUsers(String searchWord,int setSize, int pageNumber) {
+		
+		Specification<User> userSpec =  Specification.where(UserSpecifications.searchSpecification(searchWord));
+		Page<User> findAll = userRepository.findAll( userSpec, PageRequest.of(pageNumber,setSize));
+		Long totalUser = findAll.getTotalElements();
 		List<UserResponseDto> usersDto = new ArrayList<>();
 		findAll.forEach(user -> {
 			UserResponseDto dto = new UserResponseDto();
@@ -41,12 +54,15 @@ public class UserService {
 			dto.setRole(user.getRole());
 			usersDto.add(dto);
 		});
-		return usersDto;
+		HashMap<String, Object> hash = new HashMap<>();
+		hash.put("users", usersDto);
+		hash.put("totalUser", totalUser);
+		return hash;
 	}
 
 	public UserResponseDto getUser(Long userId) {
 
-		Optional<User> userResult = this.userRepository.findByUserIdAndDeletedAtIsNull(userId);
+		Optional<User> userResult = this.userRepository.findByPhoneNumberAndDeletedAtIsNull(userId);
 		UserResponseDto dto = new UserResponseDto();
 		if (userResult.isPresent()) {
 			User user = userResult.get();
@@ -61,7 +77,6 @@ public class UserService {
 	}
 
 	public String saveUser(UserRequestDto userDto) {
-
 		User user = new User();
 		user.setFirstName(userDto.getFirstName());
 		user.setLastName(userDto.getLastName());
@@ -87,9 +102,7 @@ public class UserService {
 			savedUser = userOptional.get();
 			savedUser.setFirstName(user.getFirstName());
 			savedUser.setLastName(user.getLastName());
-			savedUser.setPassword(passwordEncoder.encode(user.getPassword()));
 			savedUser.setUpdatedAt(new Date());
-			savedUser.setRole(Roles.valueOf(user.getRole()));
 			this.userRepository.save(savedUser);
 			Map<String,Object> map = new HashedMap<>();
 			map.put("name", user.getFirstName()+" "+user.getLastName());
@@ -99,15 +112,20 @@ public class UserService {
 		return null;
 	}
 
-	public String generateToken(Long phoneNumer) {
+	public TokenResponseDto generateToken(Long phoneNumer) {
 		Optional<User> userOptional = this.userRepository.findByPhoneNumberAndDeletedAtIsNull(phoneNumer);
 		if(userOptional.isPresent()) {
 			User user = userOptional.get();
 			Map<String,Object> map = new HashedMap<>();
 			map.put("name", user.getFirstName()+" "+user.getLastName());
 			map.put("role", user.getRole().name());
-			return jwtService.generateToken(new CustomUserDetail(user),map);
-		}
+			TokenResponseDto res = new TokenResponseDto();
+			res.setRole(user.getRole().name());
+			res.setUserId(user.getPhoneNumber());
+			res.setToken(jwtService.generateToken(new CustomUserDetail(user),map));
+			res.setRefreshToken(createRefreshToken(phoneNumer).getToken());
+			return res;
+			}
 		return null;
 	}
 
@@ -121,5 +139,34 @@ public class UserService {
 		res.setName((String) extractAllClaims.get("name"));
 		res.setRole((String) extractAllClaims.get("role"));
 		return res;
+	}
+	
+	
+	public RefreshToken createRefreshToken(Long phoneNumber) {
+		
+		Optional<User> userOpt = userRepository.findByPhoneNumberAndDeletedAtIsNull(phoneNumber);
+		User user =null;
+		if(userOpt.isPresent()) {
+			user = userOpt.get();
+			refreshTokenRepository.deleteAllByUserId(user.getUserId());
+		}
+		RefreshToken refreshToken = RefreshToken
+		.builder()
+		.expireAt(new Date((new Date().getTime()+(10*24*60*60*1000))))
+		.token(UUID.randomUUID().toString())
+		.user(user)
+		.build();
+		
+		return refreshTokenRepository.save(refreshToken);
+	}
+
+	public TokenResponseDto refreshToken(String token) {
+		
+		Optional<RefreshToken> refreshTokenOpt = refreshTokenRepository.findByToken(token);	
+		if(refreshTokenOpt.isPresent()) {
+		return generateToken(refreshTokenOpt.get().getUser().getPhoneNumber());
+		}
+		return null;
+	
 	}
 }

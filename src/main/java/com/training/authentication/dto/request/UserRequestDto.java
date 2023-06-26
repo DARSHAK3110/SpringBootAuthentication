@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 
 public class UserRequestDto {
 
-	@Min(value = 1, message = "validation.userId")
+	@Min(value = 0, message = "validation.userId")
 	private Long userId;
 	@Size(max = 16, message = "validation.firstNameSize")
 	@Pattern(regexp = "^(\\d|\\w)+$", message = "validation.firstNamePattern")
@@ -65,6 +65,7 @@ public class UserRequestDto {
 	}
 
 	public void setRole(String role) {
+		System.out.println(role);
 		this.role = role;
 	}
 

@@ -12,4 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class TokenResponseDto  extends CustomBaseResponseDto{
 	private String token;	
+	private String role;
+	private Long userId;
+	private String refreshToken;
 }

@@ -1,11 +1,14 @@
 package com.training.authentication.controller;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -44,25 +47,28 @@ public class UserController {
 	private final AuthenticationManager authenticationManager;
  
 	@GetMapping //get all user
-	public ResponseEntity<List<UserResponseDto>> getAllUsers() {
-		List<UserResponseDto> users = this.userSerivceImpl.getAllUsers();
-		return ResponseEntity.of(Optional.of(users));
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	public ResponseEntity<Map<String,Object>> getAllUsers(int pageNumber, int setSize, String searchWord) {
+		
+		Map<String, Object> allUsers = this.userSerivceImpl.getAllUsers(searchWord,setSize,pageNumber);
+		return ResponseEntity.of(Optional.of(allUsers));
 	}
 
+	@PreAuthorize("hasRole('ROLE_ADMIN') or #userId == authentication.principal")
 	@GetMapping("/{userId}") //get user
-	public ResponseEntity<UserResponseDto> getUser(@PathVariable("userId") @Min(1) Long userId) {
-		UserResponseDto user = this.userSerivceImpl.getUser(userId);
+	public ResponseEntity<UserResponseDto> getUser(@PathVariable("userId") @Min(1) String userId) {
+		UserResponseDto user = this.userSerivceImpl.getUser(Long.parseLong(userId));
 		return ResponseEntity.of(Optional.of(user));
 	}
 
 	
-
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@DeleteMapping("/{userId}") //delete user
 	public ResponseEntity<CustomBaseResponseDto> deleteUser(@PathVariable("userId") @Min(1) Long userId) {
 		this.userSerivceImpl.deleteUser(userId);
 		return ResponseEntity.ok(new CustomBaseResponseDto(env.getRequiredProperty(OPERATION_SUCCESS)));
 	}
-
+	@PreAuthorize("hasRole('ROLE_ADMIN') or #userId == authentication.principal")
 	@PutMapping("/{userId}") //update user
 	public ResponseEntity<CustomBaseResponseDto> updateUser(@Valid @RequestBody UserRequestDto user,
 			@PathVariable("userId") @Min(1) Long userId) {
@@ -73,26 +79,23 @@ public class UserController {
 	
 	@PostMapping //ad user and get token
 	public ResponseEntity<TokenResponseDto> saveUser(@Valid @RequestBody UserRequestDto user) {
-		String token = this.userSerivceImpl.saveUser(user);
+		this.userSerivceImpl.saveUser(user);
 		TokenResponseDto res = new TokenResponseDto();
 		res.setMessage(env.getRequiredProperty(OPERATION_SUCCESS));
-		res.setToken(token);
 		return ResponseEntity.ok(res);
 	}
 
 	
 	@PostMapping("/login") //get refresh token
 	public ResponseEntity<TokenResponseDto> loginUser(@Valid @RequestBody UserLoginRequestDto user) {
-		System.out.println(user);
 		authenticationManager
 				.authenticate(new UsernamePasswordAuthenticationToken(user.getPhoneNumber(), user.getPassword()));
-		String userRes = this.userSerivceImpl.generateToken(user.getPhoneNumber());
-		TokenResponseDto res = new TokenResponseDto();
+		TokenResponseDto res = this.userSerivceImpl.generateToken(user.getPhoneNumber());
 		res.setMessage(env.getRequiredProperty(OPERATION_SUCCESS));
-		res.setToken(userRes);
 		return ResponseEntity.ok(res);
 	}
 	
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("/details") //get details of token
 	ResponseEntity<ClaimsResponseDto> tokenDetails(@NonNull HttpServletRequest request ){
 		String header = request.getHeader("Authorization");
@@ -100,5 +103,11 @@ public class UserController {
 		details.setMessage(env.getRequiredProperty(OPERATION_SUCCESS));
 		return ResponseEntity.ok(details);
 	}
-
+	@PostMapping("/refresh") //get refresh token
+	public ResponseEntity<TokenResponseDto> refreshToken(@RequestBody String token) {
+		TokenResponseDto res =  this.userSerivceImpl.refreshToken(token);
+		res.setMessage(env.getRequiredProperty(OPERATION_SUCCESS));
+		return ResponseEntity.ok(res);
+		
+	}
 }

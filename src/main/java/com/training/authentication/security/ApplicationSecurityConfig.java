@@ -3,8 +3,8 @@ package com.training.authentication.security;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -14,11 +14,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import com.training.authentication.entity.enums.Roles;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class ApplicationSecurityConfig {
 
@@ -32,9 +32,6 @@ public class ApplicationSecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
 		security.csrf(csrf -> csrf.disable())
 		.cors(cors-> cors.configurationSource(corsConfigurationSource()))
-				.authorizeHttpRequests(authorizeHttpRequests -> authorizeHttpRequests
-						.requestMatchers(HttpMethod.POST, "/api/v1/users/**").permitAll())
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/api/v1/users/**").hasRole(Roles.ADMIN.name()))
 				.sessionManagement(
 						sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationProvider(authenticationProvider)
