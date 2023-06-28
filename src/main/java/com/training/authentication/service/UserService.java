@@ -8,13 +8,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.commons.collections4.map.HashedMap;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.training.authentication.dto.request.FilterDto;
 import com.training.authentication.dto.request.UserRequestDto;
 import com.training.authentication.dto.response.ClaimsResponseDto;
 import com.training.authentication.dto.response.TokenResponseDto;
@@ -27,6 +29,7 @@ import com.training.authentication.repository.UserRepository;
 import com.training.authentication.repository.UserSpecifications;
 import com.training.authentication.security.CustomUserDetail;
 import com.training.authentication.security.JwtService;
+
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 
@@ -38,26 +41,29 @@ public class UserService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtService jwtService;
-	 
-	public Map<String, Object > getAllUsers(String searchWord,int setSize, int pageNumber) {
-		
-		Specification<User> userSpec =  Specification.where(UserSpecifications.searchSpecification(searchWord));
-		Page<User> findAll = userRepository.findAll( userSpec, PageRequest.of(pageNumber,setSize));
-		Long totalUser = findAll.getTotalElements();
-		List<UserResponseDto> usersDto = new ArrayList<>();
-		findAll.forEach(user -> {
-			UserResponseDto dto = new UserResponseDto();
-			dto.setFirstName(user.getFirstName());
-			dto.setLastName(user.getLastName());
-			dto.setPhoneNumber(user.getPhoneNumber());
-			dto.setUserId(user.getUserId());
-			dto.setRole(user.getRole());
-			usersDto.add(dto);
-		});
-		HashMap<String, Object> hash = new HashMap<>();
-		hash.put("users", usersDto);
-		hash.put("totalUser", totalUser);
-		return hash;
+	@Autowired
+	private UserSpecifications userSpecifications;
+	
+	
+	
+	public Map<String, Object > getAllUsers(FilterDto searchWord) {
+		//Specification<User> userSpec =  Specification.where(UserSpecifications.searchSpecification(searchWord));
+		//Page<User> findAll = userRepository.findAll( userSpec,PageRequest.of(searchWord.getPageNumber(),searchWord.getSetSize()));
+		return userSpecifications.searchSpecification(searchWord);
+//		//Long totalUser = findAll.getTotalElements();
+//		
+//		List<UserResponseDto> usersDto = new ArrayList<>();
+//		findAll.forEach(user -> {
+//		
+//			UserResponseDto dto = new UserResponseDto();
+//			dto.setFirstName(user.getFirstName());
+//			dto.setLastName(user.getLastName());
+//			dto.setPhoneNumber(user.getPhoneNumber());
+//			dto.setUserId(user.getUserId());
+//			dto.setRole(user.getRole());
+//			usersDto.add(dto);
+//		});
+//		return null;
 	}
 
 	public UserResponseDto getUser(Long userId) {
@@ -155,8 +161,7 @@ public class UserService {
 		.expireAt(new Date((new Date().getTime()+(10*24*60*60*1000))))
 		.token(UUID.randomUUID().toString())
 		.user(user)
-		.build();
-		
+		.build();		
 		return refreshTokenRepository.save(refreshToken);
 	}
 

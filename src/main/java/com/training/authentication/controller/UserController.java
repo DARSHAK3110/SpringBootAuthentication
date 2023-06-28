@@ -1,12 +1,11 @@
 package com.training.authentication.controller;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,7 +18,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.training.authentication.dto.request.FilterDto;
 import com.training.authentication.dto.request.UserLoginRequestDto;
 import com.training.authentication.dto.request.UserRequestDto;
 import com.training.authentication.dto.response.ClaimsResponseDto;
@@ -48,9 +50,9 @@ public class UserController {
  
 	@GetMapping //get all user
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	public ResponseEntity<Map<String,Object>> getAllUsers(int pageNumber, int setSize, String searchWord) {
-		
-		Map<String, Object> allUsers = this.userSerivceImpl.getAllUsers(searchWord,setSize,pageNumber);
+	public ResponseEntity<Map<String,Object>> getAllUsers(@RequestParam(value = "searchWord") String searchWord) throws IOException {
+		FilterDto dto = new ObjectMapper().readValue(searchWord.getBytes(), FilterDto.class);
+		Map<String, Object> allUsers = this.userSerivceImpl.getAllUsers(dto);
 		return ResponseEntity.of(Optional.of(allUsers));
 	}
 
