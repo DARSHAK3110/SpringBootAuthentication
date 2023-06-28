@@ -1,11 +1,11 @@
-package com.training.authentication.dto.request;
+package com.training.authentication.repository;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.jpa.domain.Specification;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.training.authentication.dto.request.FilterDto;
 import com.training.authentication.entity.User;
 import com.training.authentication.entity.User_;
 
@@ -13,47 +13,42 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class FilterDto implements Specification<User> {
-	@JsonProperty
-	private String firstName;
-	@JsonProperty
-	private String lastName;
-	@JsonProperty
-	private String phoneNumber;
-	@JsonProperty
-	private int pageNumber;
-	@JsonProperty
-	private int setSize;
+public class UserSpec implements Specification<User> {
+	
+	
+	private FilterDto filterDto;
+
+	public UserSpec(FilterDto filterDto) {
+		super();
+		this.filterDto = filterDto;
+	}
+
+	public UserSpec() {
+		super();
+	}
 
 	@Override
 	public Predicate toPredicate(Root<User> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
 		List<Predicate> pred = new ArrayList<>();
-		if (!getFirstName().equals("")) {
+		if (!filterDto.getFirstName().equals("")) {
 			pred.add(criteriaBuilder.like(root.get(User_.FIRST_NAME).as(String.class),
-					"%" + getFirstName().toLowerCase() + "%"));
-
+					"%" + filterDto.getFirstName().toLowerCase() + "%"));
+			
 		}
-		if (!getLastName().equals("")) {
+		if (!filterDto.getLastName().equals("")) {
 			pred.add(criteriaBuilder.like(root.get(User_.LAST_NAME).as(String.class),
-					"%" + getLastName().toLowerCase() + "%"));
-
+					"%" + filterDto.getLastName().toLowerCase() + "%"));
+			
 		}
-		if (!getPhoneNumber().equals("")) {
+		if (!filterDto.getPhoneNumber().equals("")) {
 			pred.add(criteriaBuilder.like(root.get(User_.PHONE_NUMBER).as(String.class),
-					"%" + getPhoneNumber().toLowerCase() + "%"));
-
+					"%" + filterDto.getPhoneNumber().toLowerCase() + "%"));
+			
 		}
 		pred.add(criteriaBuilder.isNull(root.get(User_.DELETED_AT)));
 		return criteriaBuilder.and(pred.toArray(new Predicate[pred.size()]));
 	}
+
 
 }

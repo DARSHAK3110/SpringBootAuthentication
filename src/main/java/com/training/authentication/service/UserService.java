@@ -43,41 +43,15 @@ public class UserService {
 	private final JwtService jwtService;
 	@Autowired
 	private UserSpecifications userSpecifications;
-	
-	
-	
-	public Map<String, Object > getAllUsers(FilterDto searchWord) {
-		//Specification<User> userSpec =  Specification.where(UserSpecifications.searchSpecification(searchWord));
-		//Page<User> findAll = userRepository.findAll( userSpec,PageRequest.of(searchWord.getPageNumber(),searchWord.getSetSize()));
+
+	public Page<UserResponseDto> getAllUsers(FilterDto searchWord) {
 		return userSpecifications.searchSpecification(searchWord);
-//		//Long totalUser = findAll.getTotalElements();
-//		
-//		List<UserResponseDto> usersDto = new ArrayList<>();
-//		findAll.forEach(user -> {
-//		
-//			UserResponseDto dto = new UserResponseDto();
-//			dto.setFirstName(user.getFirstName());
-//			dto.setLastName(user.getLastName());
-//			dto.setPhoneNumber(user.getPhoneNumber());
-//			dto.setUserId(user.getUserId());
-//			dto.setRole(user.getRole());
-//			usersDto.add(dto);
-//		});
-//		return null;
 	}
 
 	public UserResponseDto getUser(Long userId) {
-
-		Optional<User> userResult = this.userRepository.findByPhoneNumberAndDeletedAtIsNull(userId);
-		UserResponseDto dto = new UserResponseDto();
-		if (userResult.isPresent()) {
-			User user = userResult.get();
-			dto.setFirstName(user.getFirstName());
-			dto.setLastName(user.getLastName());
-			dto.setPhoneNumber(user.getPhoneNumber());
-			dto.setUserId(user.getUserId());
-			dto.setRole(user.getRole());
-			return dto;
+		Optional<UserResponseDto> user = this.userRepository.findUser(userId);
+		if (user.isPresent()) {
+			return user.get();
 		}
 		return null;
 	}
@@ -90,10 +64,10 @@ public class UserService {
 		user.setPhoneNumber(userDto.getPhoneNumber());
 		user.setRole(Roles.valueOf(userDto.getRole()));
 		this.userRepository.save(user);
-		Map<String,Object> map = new HashedMap<>();
-		map.put("name", user.getFirstName()+" "+user.getLastName());
+		Map<String, Object> map = new HashedMap<>();
+		map.put("name", user.getFirstName() + " " + user.getLastName());
 		map.put("role", user.getRole().name());
-		return jwtService.generateToken(new CustomUserDetail(user),map);
+		return jwtService.generateToken(new CustomUserDetail(user), map);
 	}
 
 	@Transactional
@@ -102,7 +76,7 @@ public class UserService {
 	}
 
 	public String updateUser(Long userId, UserRequestDto user) {
-		Optional<User> userOptional = this.userRepository.findByUserIdAndDeletedAtIsNull(userId);
+		Optional<User> userOptional = this.userRepository.findByPhoneNumberAndDeletedAtIsNull(userId);
 		User savedUser = null;
 		if (userOptional.isPresent()) {
 			savedUser = userOptional.get();
@@ -110,28 +84,28 @@ public class UserService {
 			savedUser.setLastName(user.getLastName());
 			savedUser.setUpdatedAt(new Date());
 			this.userRepository.save(savedUser);
-			Map<String,Object> map = new HashedMap<>();
-			map.put("name", user.getFirstName()+" "+user.getLastName());
+			Map<String, Object> map = new HashedMap<>();
+			map.put("name", user.getFirstName() + " " + user.getLastName());
 			map.put("role", user.getRole());
-			return jwtService.generateToken(new CustomUserDetail(savedUser),map);
+			return jwtService.generateToken(new CustomUserDetail(savedUser), map);
 		}
 		return null;
 	}
 
 	public TokenResponseDto generateToken(Long phoneNumer) {
 		Optional<User> userOptional = this.userRepository.findByPhoneNumberAndDeletedAtIsNull(phoneNumer);
-		if(userOptional.isPresent()) {
+		if (userOptional.isPresent()) {
 			User user = userOptional.get();
-			Map<String,Object> map = new HashedMap<>();
-			map.put("name", user.getFirstName()+" "+user.getLastName());
+			Map<String, Object> map = new HashedMap<>();
+			map.put("name", user.getFirstName() + " " + user.getLastName());
 			map.put("role", user.getRole().name());
 			TokenResponseDto res = new TokenResponseDto();
 			res.setRole(user.getRole().name());
 			res.setUserId(user.getPhoneNumber());
-			res.setToken(jwtService.generateToken(new CustomUserDetail(user),map));
+			res.setToken(jwtService.generateToken(new CustomUserDetail(user), map));
 			res.setRefreshToken(createRefreshToken(phoneNumer).getToken());
 			return res;
-			}
+		}
 		return null;
 	}
 
@@ -146,32 +120,27 @@ public class UserService {
 		res.setRole((String) extractAllClaims.get("role"));
 		return res;
 	}
-	
-	
+
 	public RefreshToken createRefreshToken(Long phoneNumber) {
-		
+
 		Optional<User> userOpt = userRepository.findByPhoneNumberAndDeletedAtIsNull(phoneNumber);
-		User user =null;
-		if(userOpt.isPresent()) {
+		User user = null;
+		if (userOpt.isPresent()) {
 			user = userOpt.get();
 			refreshTokenRepository.deleteAllByUserId(user.getUserId());
 		}
-		RefreshToken refreshToken = RefreshToken
-		.builder()
-		.expireAt(new Date((new Date().getTime()+(10*24*60*60*1000))))
-		.token(UUID.randomUUID().toString())
-		.user(user)
-		.build();		
+		RefreshToken refreshToken = RefreshToken.builder()
+				.expireAt(new Date((new Date().getTime() + (10 * 24 * 60 * 60 * 1000))))
+				.token(UUID.randomUUID().toString()).user(user).build();
 		return refreshTokenRepository.save(refreshToken);
 	}
 
 	public TokenResponseDto refreshToken(String token) {
-		
-		Optional<RefreshToken> refreshTokenOpt = refreshTokenRepository.findByToken(token);	
-		if(refreshTokenOpt.isPresent()) {
-		return generateToken(refreshTokenOpt.get().getUser().getPhoneNumber());
+		Optional<RefreshToken> refreshTokenOpt = refreshTokenRepository.findByToken(token);
+		if (refreshTokenOpt.isPresent()) {
+			return generateToken(refreshTokenOpt.get().getUser().getPhoneNumber());
 		}
 		return null;
-	
+
 	}
 }

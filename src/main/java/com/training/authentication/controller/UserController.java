@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -50,9 +51,8 @@ public class UserController {
  
 	@GetMapping //get all user
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	public ResponseEntity<Map<String,Object>> getAllUsers(@RequestParam(value = "searchWord") String searchWord) throws IOException {
-		FilterDto dto = new ObjectMapper().readValue(searchWord.getBytes(), FilterDto.class);
-		Map<String, Object> allUsers = this.userSerivceImpl.getAllUsers(dto);
+	public ResponseEntity<Page<UserResponseDto>> getAllUsers(FilterDto searchWord) {
+		 Page<UserResponseDto> allUsers = this.userSerivceImpl.getAllUsers(searchWord);
 		return ResponseEntity.of(Optional.of(allUsers));
 	}
 

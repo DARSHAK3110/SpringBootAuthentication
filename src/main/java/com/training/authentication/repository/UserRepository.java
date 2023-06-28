@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+
+import com.training.authentication.dto.response.UserResponseDto;
 import com.training.authentication.entity.User;
 
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
@@ -16,10 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
 	@Query(value = "update user set deleted_at = now() where phone_number= :phoneNumber", nativeQuery = true)
 	void deleteUser(Long phoneNumber);
 	
-	public Page<User> findAll(Specification<User> spec, Pageable pageable);
-	
 	Optional<User> findByPhoneNumberAndDeletedAtIsNull(Long phoneNumber);
 	
-	Optional<User> findByUserIdAndDeletedAtIsNull(Long userId);
-	
+	@Query(value = "SELECT new com.training.authentication.dto.response.UserResponseDto(firstName, lastName,phoneNumber, role) from User where phoneNumber= :phoneNumber and deletedAt is null")
+	Optional<UserResponseDto> findUser(Long phoneNumber);
 }

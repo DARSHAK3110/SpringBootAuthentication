@@ -1,7 +1,18 @@
 package com.training.authentication.dto.response;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.data.jpa.domain.Specification;
+
+import com.training.authentication.entity.User;
+import com.training.authentication.entity.User_;
 import com.training.authentication.entity.enums.Roles;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +22,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class UserResponseDto {
+public class UserResponseDto{
 	private Long userId;
 	private String firstName;
 	private String lastName;
@@ -25,6 +36,7 @@ public class UserResponseDto {
 		this.phoneNumber = phoneNumber;
 		this.role = role;
 	}
+
 	
 	
 	
