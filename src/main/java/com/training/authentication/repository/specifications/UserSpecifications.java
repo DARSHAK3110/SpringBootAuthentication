@@ -1,4 +1,4 @@
-package com.training.authentication.repository;
+package com.training.authentication.repository.specifications;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

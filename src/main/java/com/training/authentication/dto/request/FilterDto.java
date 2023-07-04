@@ -7,21 +7,12 @@ import org.springframework.data.jpa.domain.Specification;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.training.authentication.entity.User;
-import com.training.authentication.entity.User_;
-
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
+
 public class FilterDto implements Specification<User> {
 	@JsonProperty
 	private String firstName;
@@ -34,25 +25,79 @@ public class FilterDto implements Specification<User> {
 	@JsonProperty
 	private int setSize;
 
+	
+	public String getFirstName() {
+		return firstName;
+	}
+
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+
+	public String getLastName() {
+		return lastName;
+	}
+
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+
+	public int getPageNumber() {
+		return pageNumber;
+	}
+
+
+	public void setPageNumber(int pageNumber) {
+		this.pageNumber = pageNumber;
+	}
+
+
+	public int getSetSize() {
+		return setSize;
+	}
+
+
+	public void setSetSize(int setSize) {
+		this.setSize = setSize;
+	}
+
+	public FilterDto() {
+		super();
+	}
+
 	@Override
 	public Predicate toPredicate(Root<User> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
 		List<Predicate> pred = new ArrayList<>();
 		if (!getFirstName().equals("")) {
-			pred.add(criteriaBuilder.like(root.get(User_.FIRST_NAME).as(String.class),
+			pred.add(criteriaBuilder.like(root.get("firstName").as(String.class),
 					"%" + getFirstName().toLowerCase() + "%"));
 
 		}
 		if (!getLastName().equals("")) {
-			pred.add(criteriaBuilder.like(root.get(User_.LAST_NAME).as(String.class),
+			pred.add(criteriaBuilder.like(root.get("lastName").as(String.class),
 					"%" + getLastName().toLowerCase() + "%"));
 
 		}
 		if (!getPhoneNumber().equals("")) {
-			pred.add(criteriaBuilder.like(root.get(User_.PHONE_NUMBER).as(String.class),
+			pred.add(criteriaBuilder.like(root.get("phoneNumber").as(String.class),
 					"%" + getPhoneNumber().toLowerCase() + "%"));
 
 		}
-		pred.add(criteriaBuilder.isNull(root.get(User_.DELETED_AT)));
+		pred.add(criteriaBuilder.isNull(root.get("deletedAt")));
 		return criteriaBuilder.and(pred.toArray(new Predicate[pred.size()]));
 	}
 

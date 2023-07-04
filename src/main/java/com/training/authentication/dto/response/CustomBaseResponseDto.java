@@ -19,5 +19,5 @@ public class CustomBaseResponseDto {
 	public CustomBaseResponseDto() {
 		super();
 	}
-	
+
 }

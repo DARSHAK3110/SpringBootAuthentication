@@ -1,34 +1,15 @@
 package com.training.authentication.dto.response;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.springframework.data.jpa.domain.Specification;
-
-import com.training.authentication.entity.User;
-import com.training.authentication.entity.User_;
 import com.training.authentication.entity.enums.Roles;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
-@Builder
-public class UserResponseDto{
+public class UserResponseDto {
 	private Long userId;
 	private String firstName;
 	private String lastName;
 	private Long phoneNumber;
 	private Roles role;
 	private String password;
+
 	public UserResponseDto(String firstName, String lastName, Long phoneNumber, Roles role) {
 		super();
 		this.firstName = firstName;
@@ -37,8 +18,55 @@ public class UserResponseDto{
 		this.role = role;
 	}
 
-	
-	
-	
-		
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public String getFirstName() {
+		return firstName;
+	}
+
+	public void setFirstName(String firstName) {
+		this.firstName = firstName;
+	}
+
+	public String getLastName() {
+		return lastName;
+	}
+
+	public void setLastName(String lastName) {
+		this.lastName = lastName;
+	}
+
+	public Long getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(Long phoneNumber) {
+		this.phoneNumber = phoneNumber;
+	}
+
+	public Roles getRole() {
+		return role;
+	}
+
+	public void setRole(Roles role) {
+		this.role = role;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public UserResponseDto() {
+		super();
+	}
 }

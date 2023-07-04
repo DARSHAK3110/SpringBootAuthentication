@@ -15,27 +15,49 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+
 @Entity
-@Table(name = "log",schema ="authentication" )
+@Table(name = "log", schema = "authentication")
 public class Log {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "log_id")
 	private Long logId;
-	@ManyToOne(cascade = CascadeType.MERGE,fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;
 	@CreationTimestamp
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "created_at",  nullable = false)
+	@Column(name = "created_at", nullable = false)
 	private Date createdAt;
+
+	public Long getLogId() {
+		return logId;
+	}
+
+	public void setLogId(Long logId) {
+		this.logId = logId;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public Date getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(Date createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public Log() {
+		super();
+	}
+
 }

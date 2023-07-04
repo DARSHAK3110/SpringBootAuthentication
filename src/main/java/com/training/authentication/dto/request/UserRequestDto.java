@@ -65,7 +65,6 @@ public class UserRequestDto {
 	}
 
 	public void setRole(String role) {
-		System.out.println(role);
 		this.role = role;
 	}
 

@@ -2,6 +2,7 @@ package com.training.authentication.security;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,13 +16,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import com.training.authentication.entity.User;
 import com.training.authentication.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 
 @Configuration
-@RequiredArgsConstructor
 public class SecurityBean {
 
-	private final UserRepository userRepo;
+	@Autowired
+	private UserRepository userRepo;
 	
 	@Bean
 	public UserDetailsService userDetailsService() {

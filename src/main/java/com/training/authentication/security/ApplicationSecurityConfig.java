@@ -1,9 +1,9 @@
 package com.training.authentication.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,25 +16,26 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import lombok.RequiredArgsConstructor;
+
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 @EnableTransactionManagement
-@RequiredArgsConstructor
 public class ApplicationSecurityConfig {
 
-	private final AuthenticationProvider authenticationProvider;
-	private final JwtAuthValidation jwtAuthValidation;
-	
+	@Autowired
+	private AuthenticationProvider authenticationProvider;
+	@Autowired
+	private JwtAuthValidation jwtAuthValidation;
+
 	@Qualifier("customAuthenticationEntryPoint")
-    private final AuthenticationEntryPoint authEntryPoint;
+	@Autowired
+	private AuthenticationEntryPoint authEntryPoint;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
-		security.csrf(csrf -> csrf.disable())
-		.cors(cors-> cors.configurationSource(corsConfigurationSource()))
+		security.csrf(csrf -> csrf.disable()).cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.sessionManagement(
 						sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authenticationProvider(authenticationProvider)
@@ -46,18 +47,16 @@ public class ApplicationSecurityConfig {
 
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
-		 CorsConfiguration configuration = new CorsConfiguration();
-	        configuration.setAllowedOriginPatterns(java.util.Arrays.asList("*"));
-	        configuration.setAllowedMethods(java.util.Arrays.asList("*"));
-	        configuration.setAllowCredentials(true);
-	        configuration.addAllowedOrigin("http://localhost:4200");
-	        configuration.addAllowedHeader("*");
-	        configuration.addAllowedMethod("*");
-	        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-	        source.registerCorsConfiguration("/**", configuration);
-	        return source;
+		CorsConfiguration configuration = new CorsConfiguration();
+		configuration.setAllowedOriginPatterns(java.util.Arrays.asList("*"));
+		configuration.setAllowedMethods(java.util.Arrays.asList("*"));
+		configuration.setAllowCredentials(true);
+		configuration.addAllowedOrigin("http://localhost:4200");
+		configuration.addAllowedHeader("*");
+		configuration.addAllowedMethod("*");
+		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+		source.registerCorsConfiguration("/**", configuration);
+		return source;
 	}
-
-
 
 }

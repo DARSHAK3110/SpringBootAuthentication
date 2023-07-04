@@ -3,7 +3,6 @@ package com.training.authentication.dto.response;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class ValidationExceptionResponseDto extends ExceptionResponseDto {
-
 	private String fieldName;
 
 	@Override
@@ -19,5 +18,4 @@ public class ValidationExceptionResponseDto extends ExceptionResponseDto {
 	public void setFieldName(String fieldName) {
 		this.fieldName = fieldName;
 	}
-
 }

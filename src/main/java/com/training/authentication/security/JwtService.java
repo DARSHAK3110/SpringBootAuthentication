@@ -1,11 +1,12 @@
 package com.training.authentication.security;
 
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import com.training.authentication.entity.Log;
@@ -17,14 +18,14 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 public class JwtService {
 
-	private final UserRepository userRepository;
-	private final LogRepository logRepository;
+	@Autowired
+	private UserRepository userRepository;
+	@Autowired
+	private LogRepository logRepository;
 	private static final String SECRET_KEY = "368E615852A5885E69A591AD26B3711111111111111111111111111111111111111";
 
 	public String extractUsername(String jwt) {
@@ -55,7 +56,7 @@ public class JwtService {
 		logRepository.save(log);
 		return Jwts.builder().setClaims(claims).setSubject(customUserDetails.getUsername())
 				.setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() +   10* 60 * 1000))
+				.setExpiration(new Date(System.currentTimeMillis() + 10 * 60 * 1000))
 				.signWith(Keys.hmacShaKeyFor(getKeys()), SignatureAlgorithm.HS256).compact();
 	}
 

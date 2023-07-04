@@ -1,21 +1,15 @@
 package com.training.authentication.service;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import org.apache.commons.collections4.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.training.authentication.dto.request.FilterDto;
 import com.training.authentication.dto.request.UserRequestDto;
 import com.training.authentication.dto.response.ClaimsResponseDto;
@@ -26,21 +20,22 @@ import com.training.authentication.entity.User;
 import com.training.authentication.entity.enums.Roles;
 import com.training.authentication.repository.RefreshTokenRepository;
 import com.training.authentication.repository.UserRepository;
-import com.training.authentication.repository.UserSpecifications;
+import com.training.authentication.repository.specifications.UserSpecifications;
 import com.training.authentication.security.CustomUserDetail;
 import com.training.authentication.security.JwtService;
-
 import io.jsonwebtoken.Claims;
-import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 public class UserService {
 
-	private final RefreshTokenRepository refreshTokenRepository;
-	private final UserRepository userRepository;
-	private final PasswordEncoder passwordEncoder;
-	private final JwtService jwtService;
+	@Autowired
+	private RefreshTokenRepository refreshTokenRepository;
+	@Autowired
+	private UserRepository userRepository;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	@Autowired
+	private JwtService jwtService;
 	@Autowired
 	private UserSpecifications userSpecifications;
 
@@ -129,10 +124,12 @@ public class UserService {
 			user = userOpt.get();
 			refreshTokenRepository.deleteAllByUserId(user.getUserId());
 		}
-		RefreshToken refreshToken = RefreshToken.builder()
-				.expireAt(new Date((new Date().getTime() + (10 * 24 * 60 * 60 * 1000))))
-				.token(UUID.randomUUID().toString()).user(user).build();
-		return refreshTokenRepository.save(refreshToken);
+		RefreshToken refreshToken = new RefreshToken();
+		refreshToken.setExpireAt(new Date((new Date().getTime() + (10 * 24 * 60 * 60 * 1000))));
+		refreshToken.setToken(UUID.randomUUID().toString());
+		refreshToken.setUser(user);
+		RefreshToken save = refreshTokenRepository.save(refreshToken);
+		return save;
 	}
 
 	public TokenResponseDto refreshToken(String token) {
